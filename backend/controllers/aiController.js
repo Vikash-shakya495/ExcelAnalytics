@@ -1,4 +1,4 @@
-const OpenAI = require('openai');
+const { OpenAI } = require('openai');
 require('dotenv').config();
 
 const openai = new OpenAI({
@@ -13,23 +13,32 @@ exports.generateInsights = async (req, res) => {
   }
 
   try {
-    // Prepare a prompt summarizing the data columns and sample rows
     const columns = Object.keys(data[0]);
     const sampleRows = data.slice(0, 5);
     const prompt = `Analyze the following tabular data and provide key insights, trends, and observations:\n\nColumns: ${columns.join(', ')}\nSample Data:\n${JSON.stringify(sampleRows, null, 2)}\n\nInsights:`;
 
-    const completion = await openai.completions.create({
-      model: 'text-davinci-003',
-      prompt,
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-3.5-turbo', // or 'gpt-4' if you have access
+      messages: [
+        { role: 'system', content: 'You are a data analyst providing insights on datasets.' },
+        { role: 'user', content: prompt },
+      ],
       max_tokens: 300,
       temperature: 0.7,
     });
 
-    const insights = completion.choices[0].text.trim();
+    const insights = completion.choices[0].message.content.trim();
 
     res.status(200).json({ insights });
   } catch (error) {
     console.error('AI Insights Error:', error);
+    console.error('Error name:', error.name);
+    console.error('Error message:', error.message);
+    console.error('Error stack:', error.stack);
+    if (error.response) {
+      console.error('OpenAI API response status:', error.response.status);
+      console.error('OpenAI API response data:', error.response.data);
+    }
     res.status(500).json({ error: 'Failed to generate insights' });
   }
 };

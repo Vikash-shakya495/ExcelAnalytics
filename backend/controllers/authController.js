@@ -67,7 +67,7 @@ exports.login = async (req, res) => {
          res.cookie("token", token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
-            sameSite: "None",
+            sameSite: process.env.NODE_ENV === 'production' ? "None" : "Lax",
          }).json(userResponse);
       });
    } catch (e) {
@@ -152,7 +152,7 @@ exports.logout = (req, res) => {
    res.cookie("token", "", {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'None'
+      sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax'
    }).json(true);
 };
 

@@ -5,3 +5,8 @@ backend/.env
 .env
 *.env
 backend/.env
+
+# Ignore env files
+.env
+*.env
+backend/.env

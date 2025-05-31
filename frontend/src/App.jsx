@@ -5,7 +5,7 @@ import Login from './pages/loginSystem/Login';
 import ForgotPassword from './pages/loginSystem/ForgotPassword';
 import ResetPassword from './pages/loginSystem/ResetPassword';
 import AdminDashboard from './pages/AdminDashboard';
-import UserDashboard from './pages/UserDashboard';
+import Dashboard from './pages/Dashboard';
 import ProtectedRoute from './components/ProtectedRoute';
 import Home from './pages/Home';
 import Navbar from './components/Navbar';
@@ -23,7 +23,7 @@ export default function App() {
 
         <Route path="/" element={<Home />} />
         <Route path="adminDashboard" element={<AdminDashboard />} />
-        <Route path="userDashboard" element={<UserDashboard />} />
+        <Route path="Dashboard" element={<Dashboard />} />
       </Routes>
       <Footer />
     </>

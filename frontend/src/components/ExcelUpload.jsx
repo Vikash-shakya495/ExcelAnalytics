@@ -8,12 +8,14 @@ export default function ExcelUpload({ onUploadSuccess }) {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState(null);
   const [insights, setInsights] = useState('');
+  const [summary, setSummary] = useState('');
   const user = useAuthStore((state) => state.user);
 
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
     setError(null);
     setInsights('');
+    setSummary('');
   };
 
   const handleUpload = async () => {
@@ -31,6 +33,7 @@ export default function ExcelUpload({ onUploadSuccess }) {
     setUploading(true);
     setError(null);
     setInsights('');
+    setSummary('');
 
     try {
       const response = await api.post('/upload', formData, {
@@ -44,10 +47,12 @@ export default function ExcelUpload({ onUploadSuccess }) {
       // Assuming response.data.upload contains the parsed data array for AI insights
       const dataForAI = response.data.upload?.data || [];
       if (dataForAI.length > 0) {
-        const aiInsights = await aiService.generateInsights(dataForAI);
-        setInsights(aiInsights);
+        const aiData = await aiService.generateInsights(dataForAI);
+        setInsights(aiData.insights);
+        setSummary(aiData.summary);
       } else {
         setInsights('No data available for AI insights.');
+        setSummary('No data available for summary.');
       }
     } catch (err) {
       setError(err.response?.data?.error || 'Upload failed');
@@ -72,6 +77,12 @@ export default function ExcelUpload({ onUploadSuccess }) {
         <div className="mt-4 p-3 border rounded bg-gray-50">
           <h4 className="font-semibold mb-2">AI Insights</h4>
           <pre className="whitespace-pre-wrap">{insights}</pre>
+        </div>
+      )}
+      {summary && (
+        <div className="mt-4 p-3 border rounded bg-gray-50">
+          <h4 className="font-semibold mb-2">Summary</h4>
+          <pre className="whitespace-pre-wrap">{summary}</pre>
         </div>
       )}
     </div>

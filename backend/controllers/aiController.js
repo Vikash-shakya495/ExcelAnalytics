@@ -15,21 +15,31 @@ exports.generateInsights = async (req, res) => {
   try {
     const columns = Object.keys(data[0]);
     const sampleRows = data.slice(0, 5);
-    const prompt = `Analyze the following tabular data and provide key insights, trends, and observations:\n\nColumns: ${columns.join(', ')}\nSample Data:\n${JSON.stringify(sampleRows, null, 2)}\n\nInsights:`;
+    const prompt = `Analyze the following tabular data and provide key insights, trends, and observations, and a concise summary:\n\nColumns: ${columns.join(', ')}\nSample Data:\n${JSON.stringify(sampleRows, null, 2)}\n\nInsights:`;
 
     const completion = await openai.chat.completions.create({
       model: 'gpt-3.5-turbo', // or 'gpt-4' if you have access
       messages: [
-        { role: 'system', content: 'You are a data analyst providing insights on datasets.' },
+        { role: 'system', content: 'You are a data analyst providing insights and summaries on datasets.' },
         { role: 'user', content: prompt },
       ],
-      max_tokens: 300,
+      max_tokens: 500,
       temperature: 0.7,
     });
 
-    const insights = completion.choices[0].message.content.trim();
+    const content = completion.choices[0].message.content.trim();
 
-    res.status(200).json({ insights });
+    // Separate insights and summary
+    const insightsSeparator = content.indexOf('Summary:');
+    let insights = content;
+    let summary = '';
+
+    if (insightsSeparator !== -1) {
+      insights = content.substring(0, insightsSeparator).trim();
+      summary = content.substring(insightsSeparator + 'Summary:'.length).trim();
+    }
+
+    res.status(200).json({ insights, summary });
   } catch (error) {
     console.error('AI Insights Error:', error);
     console.error('Error name:', error.name);

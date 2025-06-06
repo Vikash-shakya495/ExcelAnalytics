@@ -1,10 +1,8 @@
-const { OpenAI } = require('openai');
+const axios = require('axios');
 require('dotenv').config();
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-  organization: process.env.OPENAI_ORGANIZATION,
-});
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
 
 exports.generateInsights = async (req, res) => {
   const { data } = req.body;
@@ -13,42 +11,52 @@ exports.generateInsights = async (req, res) => {
     return res.status(400).json({ error: 'Each data entry must be an object (a row)' });
   }
 
-
   try {
     const columns = Object.keys(data[0]);
     const sampleRows = data.slice(0, 5);
-  const prompt = `
-  You are a data analyst. Given the following table columns and data rows, extract:
-  - Key insights (bullet points if possible)
-  - Observable trends
-  - A brief summary (under 3 sentences)
+    const prompt = `
+You are a data analyst. Given the following table columns and data rows, extract:
+- Key insights (bullet points if possible)
+- Observable trends
+- A brief summary (under 3 sentences)
 
-  Columns: ${columns.join(', ')}
+Columns: ${columns.join(', ')}
 
-  Sample Data (first 5 rows):
-  ${JSON.stringify(sampleRows, null, 2)}
+Sample Data (first 5 rows):
+${JSON.stringify(sampleRows, null, 2)}
 
-  Provide output in the following format:
-  Insights:
-  - ...
-  - ...
-  
-  Summary:
-  ...`;
+Provide output in the following format:
+Insights:
+- ...
+- ...
 
+Summary:
+...`;
 
+    console.log('Sending request to Gemini API with prompt:', prompt);
 
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-3.5-turbo', // or 'gpt-4' if you have access
-      messages: [
-        { role: 'system', content: 'You are a data analyst providing insights and summaries on datasets.' },
-        { role: 'user', content: prompt },
-      ],
-      max_tokens: 500,
-      temperature: 0.7,
-    });
+    const response = await axios.post(
+      GEMINI_API_URL,
+      {
+        contents: [
+          {
+            role: "user",
+            parts: [{ text: prompt }],
+          },
+        ],
+      },
+      // {
+      //   headers: {
+      //     Authorization: `Bearer ${GEMINI_API_KEY}`,
+      //     'Content-Type': 'application/json',
+      //   },
+      //   timeout: 10000, // 10 seconds timeout
+      // }
+    );
 
-    const content = completion.choices[0].message.content.trim();
+    console.log('Received response from Gemini API:', response.data);
+
+    const content = response.data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
 
     // Separate insights and summary
     const insightsSeparator = content.indexOf('Summary:');
@@ -62,20 +70,15 @@ exports.generateInsights = async (req, res) => {
 
     res.status(200).json({ insights, summary });
   } catch (error) {
-    if (!error) {
-      console.error('AI Insights Error: Unknown error');
-      return res.status(500).json({ error: 'Failed to generate insights' });
-    }
-    console.error('AI Insights Error:', error);
-    console.error('Error name:', error?.name || 'N/A');
-    console.error('Error message:', error?.message || 'N/A');
-    console.error('Error stack:', error?.stack || 'N/A');
+    console.error('Gemini AI Insights Error:', error);
     if (error.response) {
-      console.error('OpenAI API response status:', error.response.status);
-      console.error('OpenAI API response headers:', error.response.headers);
-      console.error('OpenAI API response data:', error.response.data);
+      console.error('Gemini API response status:', error.response.status);
+      console.error('Gemini API response headers:', error.response.headers);
+      console.error('Gemini API response data:', error.response.data);
+    } else if (error.request) {
+      console.error('No response received from Gemini API, request made:', error.request);
     } else {
-      console.error('No response received from OpenAI API');
+      console.error('Error setting up Gemini API request:', error.message);
     }
     res.status(500).json({ error: 'Failed to generate insights' });
   }

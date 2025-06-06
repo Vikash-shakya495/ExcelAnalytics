@@ -72,7 +72,7 @@ export default function ChartVisualization({ data, xColumn, yColumn }) {
   }, [xColumn, yColumn, data]);
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+    <div className="grid grid-cols-1 md:grid-cols-2  gap-8">
       {chartTypes.map((type, index) => (
         <div key={type} className="bg-white/5 backdrop-blur-lg rounded-2xl p-4 shadow-xl border border-gray-600">
           <h4 className="text-xl text-white mb-2 font-semibold capitalize">{type} Chart</h4>

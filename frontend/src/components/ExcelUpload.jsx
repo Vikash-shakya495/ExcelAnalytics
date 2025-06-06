@@ -1,21 +1,17 @@
 import { useState } from 'react';
 import api from '../services/api';
 import useAuthStore from '../store/authStore';
-import aiService from '../services/aiService';
+import { motion } from 'framer-motion';
 
 export default function ExcelUpload({ onUploadSuccess }) {
   const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState(null);
-  const [insights, setInsights] = useState('');
-  const [summary, setSummary] = useState('');
   const user = useAuthStore((state) => state.user);
 
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
     setError(null);
-    setInsights('');
-    setSummary('');
   };
 
   const handleUpload = async () => {
@@ -27,13 +23,12 @@ export default function ExcelUpload({ onUploadSuccess }) {
       setError('Please select an Excel file to upload.');
       return;
     }
+
     const formData = new FormData();
     formData.append('file', file);
 
     setUploading(true);
     setError(null);
-    setInsights('');
-    setSummary('');
 
     try {
       const response = await api.post('/upload', formData, {
@@ -43,17 +38,6 @@ export default function ExcelUpload({ onUploadSuccess }) {
       });
       onUploadSuccess(response.data.upload);
       setFile(null);
-
-      // Assuming response.data.upload contains the parsed data array for AI insights
-      const dataForAI = response.data.upload?.data || [];
-      if (dataForAI.length > 0) {
-        const aiData = await aiService.generateInsights(dataForAI);
-        setInsights(aiData.insights);
-        setSummary(aiData.summary);
-      } else {
-        setInsights('No data available for AI insights.');
-        setSummary('No data available for summary.');
-      }
     } catch (err) {
       setError(err.response?.data?.error || 'Upload failed');
     } finally {
@@ -62,29 +46,39 @@ export default function ExcelUpload({ onUploadSuccess }) {
   };
 
   return (
-    <div className="p-4 border rounded shadow max-w-md mx-auto">
-      <h3 className="text-lg font-semibold mb-2">Upload Excel File</h3>
-      <input type="file" accept=".xls,.xlsx" onChange={handleFileChange} />
-      {error && <p className="text-red-600 mt-2">{error}</p>}
+    <motion.div
+      className="max-w-lg mx-auto bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl p-6 shadow-xl transition-all duration-300"
+      initial={{ opacity: 0, y: 30 }}
+      animate={{ opacity: 1, y: 0 }}
+    >
+      <h3 className="text-2xl font-bold text-white mb-4 tracking-wide">📤 Upload Excel File</h3>
+
+      <label className="block mb-4">
+        <input
+          type="file"
+          accept=".xls,.xlsx"
+          onChange={handleFileChange}
+          className="block w-full text-sm text-gray-300 file:mr-4 file:py-2 file:px-4
+          file:rounded-md file:border-0
+          file:text-sm file:font-semibold
+          file:bg-gradient-to-r file:from-blue-600 file:to-indigo-600 file:text-white
+          hover:file:from-blue-700 hover:file:to-indigo-700"
+        />
+      </label>
+
+      {error && (
+        <p className="text-red-400 bg-red-900/20 border border-red-700 p-3 rounded-md text-sm mb-4">
+          {error}
+        </p>
+      )}
+
       <button
         onClick={handleUpload}
         disabled={uploading}
-        className="mt-3 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+        className="w-full py-2 px-4 rounded-lg text-white font-semibold bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-700 hover:to-pink-600 transition disabled:opacity-50"
       >
-        {uploading ? 'Uploading...' : 'Upload'}
+        {uploading ? '⏳ Uploading...' : '🚀 Upload'}
       </button>
-      {insights && (
-        <div className="mt-4 p-3 border rounded bg-gray-50">
-          <h4 className="font-semibold mb-2">AI Insights</h4>
-          <pre className="whitespace-pre-wrap">{insights}</pre>
-        </div>
-      )}
-      {summary && (
-        <div className="mt-4 p-3 border rounded bg-gray-50">
-          <h4 className="font-semibold mb-2">Summary</h4>
-          <pre className="whitespace-pre-wrap">{summary}</pre>
-        </div>
-      )}
-    </div>
+    </motion.div>
   );
 }

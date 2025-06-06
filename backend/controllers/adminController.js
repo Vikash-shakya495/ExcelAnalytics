@@ -4,7 +4,7 @@ const UploadModel = require('../models/Upload');
 // Get all users (admin only)
 exports.getUsers = async (req, res) => {
   try {
-    const users = await UserModel.find().select('-password');
+    const users = await UserModel.find({});
     res.status(200).json(users);
   } catch (e) {
     console.error('Get Users Error:', e);

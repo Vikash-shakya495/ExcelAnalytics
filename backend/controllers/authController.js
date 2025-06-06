@@ -57,7 +57,7 @@ exports.login = async (req, res) => {
          return res.status(401).json({ error: "Invalid password" });
       }
 
-      jwt.sign({ email: userDoc.email, id: userDoc._id }, jwtSecret, {}, (err, token) => {
+jwt.sign({ email: userDoc.email, id: userDoc._id, role: userDoc.role }, jwtSecret, {}, (err, token) => {
          if (err) return res.status(500).json({ error: "Token generation failed" });
 
          // Exclude password from response
@@ -68,6 +68,7 @@ exports.login = async (req, res) => {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: process.env.NODE_ENV === 'production' ? "None" : "Lax",
+            maxAge: 24 * 60 * 60 * 1000 // 1 day
          }).json(userResponse);
       });
    } catch (e) {

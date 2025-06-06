@@ -11,9 +11,7 @@ const mockAuthMiddleware = (req, res, next) => {
   next();
 };
 
-jest.mock('../middleware/authMiddleware', () => {
-  return () => mockAuthMiddleware;
-});
+jest.mock('../middleware/authMiddleware', () => mockAuthMiddleware);
 
 const app = express();
 app.use(bodyParser.json());

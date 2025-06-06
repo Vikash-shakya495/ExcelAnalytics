@@ -11,8 +11,11 @@ require("dotenv").config();
 const app = express();
 
 app.use(cors({
-  origin: "http://localhost:5173", // only allow this frontend origin
-  credentials: true               // allow cookies and credentials
+  origin: [
+    'http://localhost:5173',
+    'https://excel-analytics-platform-sigma.vercel.app'
+  ],
+  credentials: true
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

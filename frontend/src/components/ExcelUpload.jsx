@@ -3,6 +3,7 @@ import api from '../services/api';
 import useAuthStore from '../store/authStore';
 import { motion } from 'framer-motion';
 import aiService from '../services/aiService';
+import * as XLSX from 'xlsx';
 
 function AIInsights({ insights, summary }) {
   return (
@@ -25,7 +26,8 @@ export default function ExcelUpload({ onUploadSuccess }) {
   const user = useAuthStore((state) => state.user);
 
   const handleFileChange = (e) => {
-    setFile(e.target.files[0]);
+    const selectedFile = e.target.files[0];
+    setFile(selectedFile);
     setError(null);
     setInsights('');
     setSummary('');
@@ -41,22 +43,31 @@ export default function ExcelUpload({ onUploadSuccess }) {
       return;
     }
 
-    const formData = new FormData();
-    formData.append('file', file);
-
-    setUploading(true);
-    setError(null);
-    setInsights('');
-    setSummary('');
-
     try {
+      // Parse Excel file client-side using SheetJS
+      const data = await file.arrayBuffer();
+      const workbook = XLSX.read(data);
+      const sheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[sheetName];
+      const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+      // Pass parsed data to onUploadSuccess for chart visualization
+      onUploadSuccess({ data: jsonData, originalname: file.name, _id: Date.now() });
+
+      // Optionally upload file to backend for storage
+      const formData = new FormData();
+      formData.append('file', file);
+
+      setUploading(true);
+      setError(null);
+      setInsights('');
+      setSummary('');
+
       const response = await api.post('/upload', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
-      onUploadSuccess(response.data.upload);
-      setFile(null);
 
       // After successful upload, generate AI insights
       if (response.data.upload && response.data.upload.data) {
@@ -71,8 +82,10 @@ export default function ExcelUpload({ onUploadSuccess }) {
           setLoadingInsights(false);
         }
       }
+
+      setFile(null);
     } catch (err) {
-      setError(err.response?.data?.error || 'Upload failed');
+      setError(err.message || 'Upload failed');
     } finally {
       setUploading(false);
     }

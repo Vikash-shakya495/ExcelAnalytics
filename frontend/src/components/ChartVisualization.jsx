@@ -1,14 +1,31 @@
-import { useEffect, useRef } from "react";
-import Chart from 'chart.js/auto';
+import { useEffect, useRef, useMemo } from "react";
+import Chart from "chart.js/auto";
 
-const chartTypes = ['line', 'bar', 'pie', 'doughnut', 'radar'];
+const chartTypes = ["line", "bar", "pie", "doughnut", "radar"];
+
+// Utility to calculate stats for dataset
+const calculateStats = (values) => {
+  if (values.length === 0) return {};
+  const sum = values.reduce((a, b) => a + b, 0);
+  const avg = sum / values.length;
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  return { sum, avg, min, max };
+};
 
 export default function ChartVisualization({ data, xColumn, yColumn }) {
   const chartRefs = useRef([]);
   const chartInstances = useRef([]);
 
+  // Precompute stats
+  const stats = useMemo(() => {
+    const vals = data.map((row) => Number(row[yColumn]) || 0);
+    return calculateStats(vals);
+  }, [data, yColumn]);
+
   useEffect(() => {
-    chartInstances.current.forEach(chart => chart?.destroy());
+    // Cleanup previous charts
+    chartInstances.current.forEach((chart) => chart?.destroy());
     chartInstances.current = [];
 
     if (!xColumn || !yColumn) return;
@@ -16,69 +33,211 @@ export default function ChartVisualization({ data, xColumn, yColumn }) {
     const labels = data.map((row) => row[xColumn]);
     const values = data.map((row) => Number(row[yColumn]) || 0);
 
+    // Custom palette with neon colors
     const colorPalette = [
-      'rgba(99, 102, 241, 0.7)',    // Indigo
-      'rgba(139, 92, 246, 0.7)',    // Purple
-      'rgba(79, 70, 229, 0.7)',     // Blue
-      'rgba(96, 165, 250, 0.7)',    // Sky Blue
-      'rgba(147, 197, 253, 0.7)',   // Light Blue
-      'rgba(203, 213, 225, 0.7)',   // Gray
+      "#7C3AED", // Purple
+      "#4F46E5", // Indigo
+      "#2563EB", // Blue
+      "#14B8A6", // Teal
+      "#22D3EE", // Cyan
+      "#F43F5E", // Pink
+      "#FBBF24", // Amber
     ];
 
     chartTypes.forEach((type, index) => {
-      const ctx = chartRefs.current[index].getContext('2d');
+      const ctx = chartRefs.current[index].getContext("2d");
+
+      // Dataset config depending on chart type
+      const dataset = {
+        label: yColumn,
+        data: values,
+        borderColor: colorPalette[index % colorPalette.length],
+        borderWidth: 3,
+        fill: type !== "line",
+        tension: 0.4,
+        pointBackgroundColor: "#111827",
+        pointRadius: 6,
+        pointHoverRadius: 8,
+        backgroundColor:
+          type === "line"
+            ? colorPalette[index % colorPalette.length] + "80"
+            : colorPalette,
+        hoverBorderColor: "#fff",
+      };
+
+      // Special config for pie/doughnut
+      if (type === "pie" || type === "doughnut") {
+        dataset.backgroundColor = colorPalette.slice(0, values.length);
+        dataset.borderColor = "#111827";
+        dataset.borderWidth = 2;
+      }
+
       const chart = new Chart(ctx, {
         type,
         data: {
           labels,
-          datasets: [
-            {
-              label: yColumn,
-              data: values,
-              backgroundColor: type === 'line' ? 'rgba(99, 102, 241, 0.5)' : colorPalette,
-              borderColor: 'rgba(255,255,255,0.9)',
-              borderWidth: 2,
-              fill: type !== 'line',
-              tension: 0.3,
-              pointBackgroundColor: 'white',
-            },
-          ],
+          datasets: [dataset],
         },
         options: {
           responsive: true,
+          animation: {
+            duration: 1500,
+            easing: "easeOutQuart",
+          },
           plugins: {
             legend: {
-              display: true,
-              labels: { color: '#e0e0ff', font: { size: 14, weight: 'bold' } },
+              display: false, // We'll build custom legend
             },
-            tooltip: { enabled: true },
+            tooltip: {
+              enabled: true,
+              backgroundColor: "#7C3AED",
+              titleFont: { weight: "bold", size: 16 },
+              bodyFont: { size: 14 },
+              padding: 12,
+              cornerRadius: 8,
+              shadowOffsetX: 0,
+              shadowOffsetY: 4,
+              shadowBlur: 12,
+              shadowColor: "rgba(124, 58, 237, 0.8)",
+              displayColors: false,
+            },
           },
-          scales: type === 'pie' || type === 'doughnut' ? {} : {
-            x: {
-              title: { display: true, text: xColumn, color: '#d1d5db', font: { size: 14 } },
-              ticks: { color: '#cbd5e1' },
-              grid: { color: 'rgba(100,100,150,0.2)' },
-            },
-            y: {
-              title: { display: true, text: yColumn, color: '#d1d5db', font: { size: 14 } },
-              ticks: { color: '#cbd5e1' },
-              grid: { color: 'rgba(100,100,150,0.2)' },
-            },
-          },
+          scales:
+            type === "pie" || type === "doughnut"
+              ? {}
+              : {
+                  x: {
+                    title: {
+                      display: true,
+                      text: xColumn,
+                      color: "#C4B5FD",
+                      font: { size: 16, weight: "600" },
+                    },
+                    ticks: {
+                      color: "#DDD6FE",
+                      maxRotation: 45,
+                      minRotation: 45,
+                      autoSkip: true,
+                      maxTicksLimit: 10,
+                    },
+                    grid: {
+                      color: "rgba(124, 58, 237, 0.15)",
+                      borderDash: [6, 4],
+                    },
+                  },
+                  y: {
+                    title: {
+                      display: true,
+                      text: yColumn,
+                      color: "#C4B5FD",
+                      font: { size: 16, weight: "600" },
+                    },
+                    ticks: {
+                      color: "#DDD6FE",
+                      beginAtZero: true,
+                    },
+                    grid: {
+                      color: "rgba(124, 58, 237, 0.15)",
+                      borderDash: [6, 4],
+                    },
+                  },
+                },
         },
       });
+
       chartInstances.current.push(chart);
     });
   }, [xColumn, yColumn, data]);
 
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-2  gap-8">
-      {chartTypes.map((type, index) => (
-        <div key={type} className="bg-white/5 backdrop-blur-lg rounded-2xl p-4 shadow-xl border border-gray-600">
-          <h4 className="text-xl text-white mb-2 font-semibold capitalize">{type} Chart</h4>
-          <canvas ref={(el) => (chartRefs.current[index] = el)} className="w-full h-80" />
+  // Custom legend component
+  const CustomLegend = ({ labels, colors }) => (
+    <div className="flex flex-wrap gap-3 mt-4">
+      {labels.map((label, i) => (
+        <div
+          key={label}
+          className="flex items-center space-x-2 cursor-default select-none"
+        >
+          <div
+            style={{ backgroundColor: colors[i % colors.length] }}
+            className="w-5 h-5 rounded-full shadow-neon"
+          />
+          <span className="text-gray-200 font-semibold text-sm">{label}</span>
         </div>
       ))}
+    </div>
+  );
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-12 px-6 py-8">
+      {chartTypes.map((type, idx) => {
+        const chartTitle = `${type.charAt(0).toUpperCase() + type.slice(1)} Chart`;
+
+        return (
+          <section
+            key={type}
+            className="bg-gradient-to-tr from-purple-950 via-indigo-950 to-black
+              rounded-3xl p-8 shadow-xl border border-purple-700
+              hover:scale-[1.04] transition-transform duration-300 ease-in-out
+              cursor-pointer"
+          >
+            <header className="flex items-center justify-between mb-4">
+              <h3
+                className="text-3xl font-extrabold text-transparent bg-clip-text
+                bg-gradient-to-r from-purple-400 to-indigo-400 drop-shadow-lg select-none"
+              >
+                {chartTitle}
+              </h3>
+              <div
+                className="text-purple-300 font-semibold italic select-none text-sm"
+                title="Dataset statistics"
+              >
+                <span>Sum: {stats.sum.toFixed(1)}</span> |{" "}
+                <span>Avg: {stats.avg.toFixed(2)}</span> |{" "}
+                <span>Min: {stats.min}</span> | <span>Max: {stats.max}</span>
+              </div>
+            </header>
+
+            <canvas
+              ref={(el) => (chartRefs.current[idx] = el)}
+              className="w-full h-96 rounded-xl shadow-neon-glow bg-gradient-to-br
+                from-purple-950 via-indigo-950 to-black"
+            />
+
+            {/* Show custom legend only for pie/doughnut */}
+            {(type === "pie" || type === "doughnut") && (
+              <CustomLegend
+                labels={data.map((row) => row[xColumn])}
+                colors={[
+                  "#7C3AED",
+                  "#4F46E5",
+                  "#2563EB",
+                  "#14B8A6",
+                  "#22D3EE",
+                  "#F43F5E",
+                  "#FBBF24",
+                ]}
+              />
+            )}
+
+            {/* Description based on chart type */}
+            <p
+              className="mt-6 text-purple-300 text-sm tracking-wide leading-relaxed select-none"
+              style={{ userSelect: "none" }}
+            >
+              {type === "line" &&
+                "A smooth line chart showing trends over your data range."}
+              {type === "bar" &&
+                "Vertical bars representing your data points with neon highlights."}
+              {type === "pie" &&
+                "Slices illustrating proportions of your dataset with vibrant colors."}
+              {type === "doughnut" &&
+                "Donut chart emphasizing part-to-whole relationships."}
+              {type === "radar" &&
+                "Radar chart visualizing multivariate data across multiple dimensions."}
+            </p>
+          </section>
+        );
+      })}
     </div>
   );
 }

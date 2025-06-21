@@ -58,3 +58,19 @@ exports.getUploadHistory = async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch upload history' });
   }
 };
+
+// Delete upload by ID for user
+exports.deleteUpload = async (req, res) => {
+  try {
+    const uploadId = req.params.id;
+    const upload = await UploadModel.findOne({ _id: uploadId, user: req.user.id });
+    if (!upload) {
+      return res.status(404).json({ error: 'Upload not found or unauthorized' });
+    }
+    await UploadModel.deleteOne({ _id: uploadId });
+    res.status(200).json({ message: 'Upload deleted successfully' });
+  } catch (e) {
+    console.error('Delete Upload Error:', e);
+    res.status(500).json({ error: 'Failed to delete upload' });
+  }
+};

@@ -31,9 +31,20 @@ export default function Navbar() {
             <>
               <Link
                 to={user.role === 'admin' ? '/adminDashboard' : '/userDashboard'}
-                className="hover:text-purple-300 transition duration-200"
+                className="flex items-center space-x-2 hover:text-purple-300 transition duration-200"
               >
-                {user.role === 'admin' ? 'Admin Panel' : 'Dashboard'}
+                {user.profileImage ? (
+                  <img
+                    src={user.profileImage}
+                    alt="Profile"
+                    className="w-8 h-8 rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center text-white font-bold">
+                    {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
+                  </div>
+                )}
+                <span>{user.role === 'admin' ? 'Admin Panel' : 'Dashboard'}</span>
               </Link>
               <button
                 onClick={handleLogout}

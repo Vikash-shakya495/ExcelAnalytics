@@ -1,55 +1,59 @@
 import axios from 'axios';
 
-const GEMINI_API_KEY = 'AIzaSyBk1eL_oZ6gGJNxIqZiwi3NDM3tW8vmhqE';  // Use env var
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta2/models/text-bison-001:generateText';
+const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
+const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
 
 const generateInsights = async (data) => {
-  // Build prompt text from your data
   const columns = Object.keys(data[0]);
   const sampleRows = data.slice(0, 5);
-  const prompt = `
-You are a data analyst. Given the following table columns and data rows, extract:
-- Key insights (bullet points)
-- Observable trends
-- A brief summary (under 3 sentences)
+const prompt = `
+You are an expert data analyst and business consultant.
 
-Columns: ${columns.join(', ')}
+Given the table's **column names** and **first 5 rows**, analyze the dataset and generate insights with a human-friendly tone.
 
-Sample Data (first 5 rows):
+Focus on the following:
+
+1. 📌 **Key Observations**: Mention trends, outliers, or correlations. Use bullet points.
+2. 📊 **Data Patterns**: Highlight patterns (e.g., rising/falling values, common ranges, seasonal trends).
+3. 🧠 **AI Summary**: Write a clear 2-3 sentence executive summary, assuming this will be read by business users or decision-makers.
+4. 💡 **Suggestions** *(optional)*: If you find meaningful insights, suggest what actions might be taken based on them.
+
+**Columns**: ${columns.join(', ')}
+
+**Sample Data (first 5 rows)**:
 ${JSON.stringify(sampleRows, null, 2)}
 
-Provide output in the following format:
+👉 Please format the output clearly in sections like:
+---
 Insights:
 - ...
 - ...
-
+---
+Patterns:
+- ...
+---
 Summary:
 ...
+---
+Suggestions:
+- ...
 `;
 
   try {
     const response = await axios.post(
       GEMINI_API_URL,
       {
-        prompt: {
-          text: prompt
-        },
-        // Adjust parameters as needed, e.g., temperature, candidateCount
-        temperature: 0.7,
-        candidateCount: 1,
-        maxOutputTokens: 512,
-      },
-      {
-        headers: {
-          'Content-Type': 'application/json',
-        //   'Authorization': `Bearer ${GEMINI_API_KEY}`,
-        },
+        contents: [
+          {
+            role: "user",
+            parts: [{ text: prompt }],
+          },
+        ],
       }
     );
 
-    // The response structure varies, but typically:
-    const text = response.data?.candidates?.[0]?.output || '';
-    return text;
+    const content = response.data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    return content;
 
   } catch (error) {
     console.error('Gemini AI API error:', error.response?.data || error.message);

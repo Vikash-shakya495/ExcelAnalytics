@@ -13,7 +13,7 @@ const calculateStats = (values) => {
   return { sum, avg, min, max };
 };
 
-export default function ChartVisualization({ data, xColumn, yColumn }) {
+export default function ChartVisualization({ data, xColumn, yColumn, selectedChartType = "All" }) {
   const chartRefs = useRef([]);
   const chartInstances = useRef([]);
 
@@ -44,7 +44,11 @@ export default function ChartVisualization({ data, xColumn, yColumn }) {
       "#FBBF24", // Amber
     ];
 
-    chartTypes.forEach((type, index) => {
+    // Determine which chart types to render
+    const typesToRender =
+      selectedChartType === "All" ? chartTypes : [selectedChartType.toLowerCase()];
+
+    typesToRender.forEach((type, index) => {
       const ctx = chartRefs.current[index].getContext("2d");
 
       // Dataset config depending on chart type
@@ -147,7 +151,7 @@ export default function ChartVisualization({ data, xColumn, yColumn }) {
 
       chartInstances.current.push(chart);
     });
-  }, [xColumn, yColumn, data]);
+  }, [xColumn, yColumn, data, selectedChartType]);
 
   // Custom legend component
   const CustomLegend = ({ labels, colors }) => (
@@ -169,75 +173,147 @@ export default function ChartVisualization({ data, xColumn, yColumn }) {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-12 px-6 py-8">
-      {chartTypes.map((type, idx) => {
-        const chartTitle = `${type.charAt(0).toUpperCase() + type.slice(1)} Chart`;
+      {selectedChartType === "All"
+        ? chartTypes.map((type, idx) => {
+            const chartTitle = `${type.charAt(0).toUpperCase() + type.slice(1)} Chart`;
 
-        return (
-          <section
-            key={type}
-            className="bg-gradient-to-tr from-purple-950 via-indigo-950 to-black
+            return (
+              <section
+                key={type}
+                className="bg-gradient-to-tr from-purple-950 via-indigo-950 to-black
               rounded-3xl p-8 shadow-xl border border-purple-700
               hover:scale-[1.04] transition-transform duration-300 ease-in-out
               cursor-pointer"
-          >
-            <header className="flex items-center justify-between mb-4">
-              <h3
-                className="text-3xl font-extrabold text-transparent bg-clip-text
+              >
+                <header className="flex items-center justify-between mb-4">
+                  <h3
+                    className="text-3xl font-extrabold text-transparent bg-clip-text
                 bg-gradient-to-r from-purple-400 to-indigo-400 drop-shadow-lg select-none"
-              >
-                {chartTitle}
-              </h3>
-              <div
-                className="text-purple-300 font-semibold italic select-none text-sm"
-                title="Dataset statistics"
-              >
-                <span>Sum: {stats.sum.toFixed(1)}</span> |{" "}
-                <span>Avg: {stats.avg.toFixed(2)}</span> |{" "}
-                <span>Min: {stats.min}</span> | <span>Max: {stats.max}</span>
-              </div>
-            </header>
+                  >
+                    {chartTitle}
+                  </h3>
+                  <div
+                    className="text-purple-300 font-semibold italic select-none text-sm"
+                    title="Dataset statistics"
+                  >
+                    <span>Sum: {stats.sum.toFixed(1)}</span> |{" "}
+                    <span>Avg: {stats.avg.toFixed(2)}</span> |{" "}
+                    <span>Min: {stats.min}</span> | <span>Max: {stats.max}</span>
+                  </div>
+                </header>
 
-            <canvas
-              ref={(el) => (chartRefs.current[idx] = el)}
-              className="w-full h-96 rounded-xl shadow-neon-glow bg-gradient-to-br
+                <canvas
+                  ref={(el) => (chartRefs.current[idx] = el)}
+                  className="w-full h-96 rounded-xl shadow-neon-glow bg-gradient-to-br
                 from-purple-950 via-indigo-950 to-black"
-            />
+                />
 
-            {/* Show custom legend only for pie/doughnut */}
-            {(type === "pie" || type === "doughnut") && (
-              <CustomLegend
-                labels={data.map((row) => row[xColumn])}
-                colors={[
-                  "#7C3AED",
-                  "#4F46E5",
-                  "#2563EB",
-                  "#14B8A6",
-                  "#22D3EE",
-                  "#F43F5E",
-                  "#FBBF24",
-                ]}
-              />
-            )}
+                {/* Show custom legend only for pie/doughnut */}
+                {(type === "pie" || type === "doughnut") && (
+                  <CustomLegend
+                    labels={data.map((row) => row[xColumn])}
+                    colors={[
+                      "#7C3AED",
+                      "#4F46E5",
+                      "#2563EB",
+                      "#14B8A6",
+                      "#22D3EE",
+                      "#F43F5E",
+                      "#FBBF24",
+                    ]}
+                  />
+                )}
 
-            {/* Description based on chart type */}
-            <p
-              className="mt-6 text-purple-300 text-sm tracking-wide leading-relaxed select-none"
-              style={{ userSelect: "none" }}
-            >
-              {type === "line" &&
-                "A smooth line chart showing trends over your data range."}
-              {type === "bar" &&
-                "Vertical bars representing your data points with neon highlights."}
-              {type === "pie" &&
-                "Slices illustrating proportions of your dataset with vibrant colors."}
-              {type === "doughnut" &&
-                "Donut chart emphasizing part-to-whole relationships."}
-              {type === "radar" &&
-                "Radar chart visualizing multivariate data across multiple dimensions."}
-            </p>
-          </section>
-        );
-      })}
+                {/* Description based on chart type */}
+                <p
+                  className="mt-6 text-purple-300 text-sm tracking-wide leading-relaxed select-none"
+                  style={{ userSelect: "none" }}
+                >
+                  {type === "line" &&
+                    "A smooth line chart showing trends over your data range."}
+                  {type === "bar" &&
+                    "Vertical bars representing your data points with neon highlights."}
+                  {type === "pie" &&
+                    "Slices illustrating proportions of your dataset with vibrant colors."}
+                  {type === "doughnut" &&
+                    "Donut chart emphasizing part-to-whole relationships."}
+                  {type === "radar" &&
+                    "Radar chart visualizing multivariate data across multiple dimensions."}
+                </p>
+              </section>
+            );
+          })
+        : (() => {
+            const type = selectedChartType.toLowerCase();
+            const idx = chartTypes.indexOf(type);
+            if (idx === -1) return null;
+            const chartTitle = `${type.charAt(0).toUpperCase() + type.slice(1)} Chart`;
+            return (
+              <section
+                key={type}
+                className="bg-gradient-to-tr from-purple-950 via-indigo-950 to-black
+              rounded-3xl p-8 shadow-xl border border-purple-700
+              hover:scale-[1.04] transition-transform duration-300 ease-in-out
+              cursor-pointer"
+              >
+                <header className="flex items-center justify-between mb-4">
+                  <h3
+                    className="text-3xl font-extrabold text-transparent bg-clip-text
+                bg-gradient-to-r from-purple-400 to-indigo-400 drop-shadow-lg select-none"
+                  >
+                    {chartTitle}
+                  </h3>
+                  <div
+                    className="text-purple-300 font-semibold italic select-none text-sm"
+                    title="Dataset statistics"
+                  >
+                    <span>Sum: {stats.sum.toFixed(1)}</span> |{" "}
+                    <span>Avg: {stats.avg.toFixed(2)}</span> |{" "}
+                    <span>Min: {stats.min}</span> | <span>Max: {stats.max}</span>
+                  </div>
+                </header>
+
+                <canvas
+                  ref={(el) => (chartRefs.current[0] = el)}
+                  className="w-full h-96 rounded-xl shadow-neon-glow bg-gradient-to-br
+                from-purple-950 via-indigo-950 to-black"
+                />
+
+                {/* Show custom legend only for pie/doughnut */}
+                {(type === "pie" || type === "doughnut") && (
+                  <CustomLegend
+                    labels={data.map((row) => row[xColumn])}
+                    colors={[
+                      "#7C3AED",
+                      "#4F46E5",
+                      "#2563EB",
+                      "#14B8A6",
+                      "#22D3EE",
+                      "#F43F5E",
+                      "#FBBF24",
+                    ]}
+                  />
+                )}
+
+                {/* Description based on chart type */}
+                <p
+                  className="mt-6 text-purple-300 text-sm tracking-wide leading-relaxed select-none"
+                  style={{ userSelect: "none" }}
+                >
+                  {type === "line" &&
+                    "A smooth line chart showing trends over your data range."}
+                  {type === "bar" &&
+                    "Vertical bars representing your data points with neon highlights."}
+                  {type === "pie" &&
+                    "Slices illustrating proportions of your dataset with vibrant colors."}
+                  {type === "doughnut" &&
+                    "Donut chart emphasizing part-to-whole relationships."}
+                  {type === "radar" &&
+                    "Radar chart visualizing multivariate data across multiple dimensions."}
+                </p>
+              </section>
+            );
+          })()}
     </div>
   );
 }

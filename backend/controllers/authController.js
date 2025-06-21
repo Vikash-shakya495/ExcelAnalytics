@@ -170,3 +170,26 @@ exports.profile = async (req, res) => {
       res.status(500).json({ error: "Failed to fetch profile" });
    }
 };
+
+exports.updateProfile = async (req, res) => {
+   try {
+      const user = await UserModel.findById(req.user.id);
+      if (!user) return res.status(404).json({ error: "User not found" });
+
+      const { name, email, password } = req.body;
+
+      if (name) user.name = name;
+      if (email) user.email = email;
+      if (password) user.password = bcrypt.hashSync(password, bcrypt.genSaltSync(10));
+
+      await user.save();
+
+      const userResponse = user.toObject();
+      delete userResponse.password;
+
+      res.status(200).json(userResponse);
+   } catch (e) {
+      console.error("Update Profile Error:", e);
+      res.status(500).json({ error: "Failed to update profile" });
+   }
+};

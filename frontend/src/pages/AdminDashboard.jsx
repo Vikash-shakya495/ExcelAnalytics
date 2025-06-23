@@ -54,12 +54,12 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-black text-white px-4 py-10">
-      <div className="max-w-7xl mx-auto p-8 sm:p-12 bg-white/5 backdrop-blur-md rounded-3xl shadow-[0_8px_32px_rgba(0,0,0,0.4)] border border-white/10">
+    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-black text-white px-4 py-6 sm:py-10">
+      <div className="max-w-7xl mx-auto p-4 sm:p-8 md:p-12 bg-white/5 backdrop-blur-md rounded-3xl shadow-[0_8px_32px_rgba(0,0,0,0.4)] border border-white/10">
         
         {/* Header */}
         <motion.h2
-          className="text-4xl sm:text-5xl font-extrabold text-center mb-4 text-transparent bg-clip-text bg-gradient-to-r from-green-400 via-blue-500 to-purple-500"
+          className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-center mb-3 sm:mb-4 md:mb-6 text-transparent bg-clip-text bg-gradient-to-r from-green-400 via-blue-500 to-purple-500"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
@@ -67,13 +67,13 @@ export default function AdminDashboard() {
           🛠️ Admin Dashboard
         </motion.h2>
         
-        <p className="text-center text-gray-400 mb-8">
+        <p className="text-center text-gray-400 mb-6 sm:mb-8">
           Manage users, view platform activity, and stay on top of system metrics.
         </p>
 
         {user && (
           <motion.div
-            className="text-center mb-10 text-lg sm:text-xl text-gray-200"
+            className="text-center mb-8 sm:mb-10 text-base sm:text-lg text-gray-200"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
           >
@@ -83,7 +83,7 @@ export default function AdminDashboard() {
 
         {error && (
           <motion.div
-            className="bg-red-500/20 text-red-400 font-medium px-6 py-4 mb-8 rounded-xl shadow-inner"
+            className="bg-red-500/20 text-red-400 font-medium px-4 py-3 mb-6 rounded-xl shadow-inner"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
           >
@@ -92,18 +92,18 @@ export default function AdminDashboard() {
         )}
 
         {/* Section Divider */}
-        <hr className="my-10 border-white/10" />
+        <hr className="my-8 sm:my-10 border-white/10" />
 
         {/* User Management Section */}
         <motion.section
-          className="mb-16"
+          className="mb-12 sm:mb-16"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <div className="flex items-center gap-2 mb-4">
-            <FaUsers className="text-green-400 text-xl" />
-            <h3 className="text-3xl font-bold text-white">User Management</h3>
+          <div className="flex items-center gap-2 mb-3 sm:mb-4">
+            <FaUsers className="text-green-400 text-lg sm:text-xl" />
+            <h3 className="text-2xl sm:text-3xl font-bold text-white">User Management</h3>
           </div>
 
           {loadingUsers ? (
@@ -111,23 +111,23 @@ export default function AdminDashboard() {
           ) : users.length === 0 ? (
             <p className="text-center italic text-gray-500">No users found.</p>
           ) : (
-            <ul className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-96 overflow-y-auto pr-2">
+            <ul className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 max-h-80 sm:max-h-96 overflow-y-auto pr-2">
               {users.map((u) => (
                 <motion.li
                   key={u._id}
-                  className="flex justify-between items-center p-4 bg-white/10 rounded-xl shadow hover:shadow-xl transition-transform hover:scale-[1.02]"
+                  className="flex justify-between items-center p-3 sm:p-4 bg-white/10 rounded-xl shadow hover:shadow-xl transition-transform hover:scale-[1.02]"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                 >
                   <div>
-                    <p className="font-semibold text-white">{u.name}</p>
-                    <p className="text-sm text-gray-400">{u.email} · Role: {u.role}</p>
+                    <p className="font-semibold text-white text-sm sm:text-base">{u.name}</p>
+                    <p className="text-xs sm:text-sm text-gray-400">{u.email} · Role: {u.role}</p>
                   </div>
                   <button
                     onClick={() => handleDeleteUser(u._id)}
-                    className="ml-4 px-4 py-2 text-sm bg-gradient-to-r from-red-600 to-red-800 text-white rounded-lg hover:brightness-110 shadow-md flex items-center gap-2"
+                    className="ml-3 sm:ml-4 px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm bg-gradient-to-r from-red-600 to-red-800 text-white rounded-lg hover:brightness-110 shadow-md flex items-center gap-1 sm:gap-2"
                   >
-                    <FaTrashAlt /> Delete
+                    <FaTrashAlt className="text-sm sm:text-base" /> Delete
                   </button>
                 </motion.li>
               ))}
@@ -136,7 +136,7 @@ export default function AdminDashboard() {
         </motion.section>
 
         {/* Section Divider */}
-        <hr className="my-10 border-white/10" />
+        <hr className="my-8 sm:my-10 border-white/10" />
 
         {/* Usage Statistics Section */}
         <motion.section
@@ -144,29 +144,29 @@ export default function AdminDashboard() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <div className="flex items-center gap-2 mb-4">
-            <FaFileUpload className="text-blue-400 text-xl" />
-            <h3 className="text-3xl font-bold text-white">Usage Statistics</h3>
+          <div className="flex items-center gap-2 mb-3 sm:mb-4">
+            <FaFileUpload className="text-blue-400 text-lg sm:text-xl" />
+            <h3 className="text-2xl sm:text-3xl font-bold text-white">Usage Statistics</h3>
           </div>
 
           {loadingStats ? (
             <p className="text-center text-gray-400">Loading usage statistics...</p>
           ) : usageStats ? (
-            <div className="grid sm:grid-cols-2 gap-6 bg-white/10 p-6 rounded-2xl shadow-md border border-white/10">
-              <div className="p-4 bg-black/20 rounded-xl text-white space-y-1 shadow">
-                <p className="text-lg font-medium">
+            <div className="grid sm:grid-cols-2 gap-4 sm:gap-6 bg-white/10 p-4 sm:p-6 rounded-2xl shadow-md border border-white/10">
+              <div className="p-3 sm:p-4 bg-black/20 rounded-xl text-white space-y-1 shadow">
+                <p className="text-base sm:text-lg font-medium">
                   👥 Total Users:
                 </p>
-                <p className="text-2xl font-bold text-green-400">
+                <p className="text-xl sm:text-2xl font-bold text-green-400">
                   {usageStats.totalUsers}
                 </p>
               </div>
 
-              <div className="p-4 bg-black/20 rounded-xl text-white space-y-1 shadow">
-                <p className="text-lg font-medium">
+              <div className="p-3 sm:p-4 bg-black/20 rounded-xl text-white space-y-1 shadow">
+                <p className="text-base sm:text-lg font-medium">
                   📁 Total Uploads:
                 </p>
-                <p className="text-2xl font-bold text-blue-400">
+                <p className="text-xl sm:text-2xl font-bold text-blue-400">
                   {usageStats.totalUploads}
                 </p>
               </div>
@@ -219,7 +219,7 @@ export default function AdminDashboard() {
         </motion.section>
 
         {/* Section Divider */}
-        <hr className="my-10 border-white/10" />
+        <hr className="my-8 sm:my-10 border-white/10" />
 
         {/* System Info Placeholder Section */}
         <motion.section
@@ -229,7 +229,7 @@ export default function AdminDashboard() {
         >
           <div className="flex items-center gap-2 mb-4">
             <FaServer className="text-purple-400 text-xl" />
-            <h3 className="text-3xl font-bold text-white">System Overview (Coming Soon)</h3>
+            <h3 className="text-2xl sm:text-3xl font-bold text-white">System Overview (Coming Soon)</h3>
           </div>
           <p className="text-gray-400">
             Charts, error logs, server status, and system health metrics will be available soon.

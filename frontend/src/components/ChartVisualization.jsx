@@ -177,28 +177,47 @@ export default function ChartVisualization({ data, xColumn, yColumn, selectedCha
         ? chartTypes.map((type, idx) => {
             const chartTitle = `${type.charAt(0).toUpperCase() + type.slice(1)} Chart`;
 
+            const handleDownload = () => {
+              const canvas = chartRefs.current[idx];
+              if (!canvas) return;
+              const url = canvas.toDataURL("image/png");
+              const a = document.createElement("a");
+              a.href = url;
+              a.download = `${type}-chart.png`;
+              a.click();
+            };
+
             return (
               <section
                 key={type}
                 className="bg-gradient-to-tr from-purple-950 via-indigo-950 to-black
-              rounded-3xl p-8 shadow-xl border border-purple-700
+              rounded-3xl  md:p-8 shadow-xl border border-purple-700
               hover:scale-[1.04] transition-transform duration-300 ease-in-out
               cursor-pointer"
               >
-                <header className="flex items-center justify-between mb-4">
+                <header className="flex flex-col md:flex-row items-center justify-between mb-4">
                   <h3
                     className="text-3xl font-extrabold text-transparent bg-clip-text
                 bg-gradient-to-r from-purple-400 to-indigo-400 drop-shadow-lg select-none"
                   >
                     {chartTitle}
                   </h3>
-                  <div
-                    className="text-purple-300 font-semibold italic select-none text-sm"
-                    title="Dataset statistics"
-                  >
-                    <span>Sum: {stats.sum.toFixed(1)}</span> |{" "}
-                    <span>Avg: {stats.avg.toFixed(2)}</span> |{" "}
-                    <span>Min: {stats.min}</span> | <span>Max: {stats.max}</span>
+                  <div className="flex flex-col md:flex-row items-center space-x-4">
+                    <div
+                      className="text-purple-300 font-semibold italic select-none text-sm"
+                      title="Dataset statistics"
+                    >
+                      <span>Sum: {stats.sum.toFixed(1)}</span> |{" "}
+                      <span>Avg: {stats.avg.toFixed(2)}</span> |{" "}
+                      <span>Min: {stats.min}</span> | <span>Max: {stats.max}</span>
+                    </div>
+                    <button
+                      onClick={handleDownload}
+                      className="text-sm px-3 py-1 rounded bg-purple-700 hover:bg-purple-600 text-white transition"
+                      title="Download Chart as PNG"
+                    >
+                      Download
+                    </button>
                   </div>
                 </header>
 
@@ -248,6 +267,17 @@ export default function ChartVisualization({ data, xColumn, yColumn, selectedCha
             const idx = chartTypes.indexOf(type);
             if (idx === -1) return null;
             const chartTitle = `${type.charAt(0).toUpperCase() + type.slice(1)} Chart`;
+
+            const handleDownload = () => {
+              const canvas = chartRefs.current[0];
+              if (!canvas) return;
+              const url = canvas.toDataURL("image/png");
+              const a = document.createElement("a");
+              a.href = url;
+              a.download = `${type}-chart.png`;
+              a.click();
+            };
+
             return (
               <section
                 key={type}
@@ -263,13 +293,22 @@ export default function ChartVisualization({ data, xColumn, yColumn, selectedCha
                   >
                     {chartTitle}
                   </h3>
-                  <div
-                    className="text-purple-300 font-semibold italic select-none text-sm"
-                    title="Dataset statistics"
-                  >
-                    <span>Sum: {stats.sum.toFixed(1)}</span> |{" "}
-                    <span>Avg: {stats.avg.toFixed(2)}</span> |{" "}
-                    <span>Min: {stats.min}</span> | <span>Max: {stats.max}</span>
+                  <div className="flex items-center space-x-4">
+                    <div
+                      className="text-purple-300 font-semibold italic select-none text-sm"
+                      title="Dataset statistics"
+                    >
+                      <span>Sum: {stats.sum.toFixed(1)}</span> |{" "}
+                      <span>Avg: {stats.avg.toFixed(2)}</span> |{" "}
+                      <span>Min: {stats.min}</span> | <span>Max: {stats.max}</span>
+                    </div>
+                    <button
+                      onClick={handleDownload}
+                      className="text-sm px-3 py-1 rounded bg-purple-700 hover:bg-purple-600 text-white transition"
+                      title="Download Chart as PNG"
+                    >
+                      Download
+                    </button>
                   </div>
                 </header>
 

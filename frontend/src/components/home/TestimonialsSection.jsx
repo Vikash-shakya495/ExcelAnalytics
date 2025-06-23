@@ -24,21 +24,21 @@ const testimonials = [
 
 export default function TestimonialsSection() {
   return (
-    <section className="relative bg-gradient-to-br from-black via-indigo-950 to-black py-24 px-6 overflow-hidden">
+    <section className="relative bg-gradient-to-br from-black via-indigo-950 to-black py-16 px-6 sm:px-8 overflow-hidden">
       {/* Glowing background blobs */}
       <div className="absolute -top-24 -left-24 w-[300px] h-[300px] bg-indigo-500 opacity-20 blur-[120px] rounded-full" />
       <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-pink-500 opacity-20 blur-[100px] rounded-full" />
-
+  
       <div className="max-w-6xl mx-auto text-center relative z-10">
-        <h2 className="text-4xl md:text-5xl font-extrabold mb-12 bg-gradient-to-r from-indigo-400 to-pink-600 text-transparent bg-clip-text">
+        <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold mb-10 sm:mb-12 bg-gradient-to-r from-indigo-400 to-pink-600 text-transparent bg-clip-text">
           What Our Users Say
         </h2>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 px-2">
+  
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 px-2">
           {testimonials.map(({ name, feedback, img, rating }, i) => (
             <motion.div
               key={i}
-              className="relative bg-white/5 border border-white/10 backdrop-blur-xl rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300"
+              className="relative bg-white/5 border border-white/10 backdrop-blur-xl rounded-2xl p-4 sm:p-6 shadow-lg hover:shadow-2xl transition-all duration-300"
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -48,25 +48,25 @@ export default function TestimonialsSection() {
                 <img
                   src={img}
                   alt={name}
-                  className="w-16 h-16 rounded-full border-2 border-indigo-400 shadow-lg mb-4 object-cover"
+                  className="w-14 h-14 sm:w-16 sm:h-16 rounded-full border-2 border-indigo-400 shadow-lg mb-4 object-cover"
                 />
-                <h3 className="text-white font-semibold text-lg">{name}</h3>
+                <h3 className="text-white font-semibold text-lg sm:text-xl">{name}</h3>
                 <div className="flex gap-1 my-2">
                   {Array.from({ length: 5 }, (_, idx) => (
                     <FaStar
                       key={idx}
                       className={`${
                         idx < rating ? "text-yellow-400" : "text-gray-500"
-                      } text-sm`}
+                      } text-sm sm:text-base`}
                     />
                   ))}
                 </div>
-                <p className="text-gray-300 text-sm italic leading-relaxed mt-2">
+                <p className="text-gray-300 text-sm sm:text-base italic leading-relaxed mt-2">
                   “{feedback}”
                 </p>
               </div>
               {/* Quote mark decoration */}
-              <div className="absolute -top-6 left-6 text-6xl text-pink-500/20 select-none">
+              <div className="absolute -top-6 left-6 text-5xl sm:text-6xl text-pink-500/20 select-none">
                 “
               </div>
             </motion.div>
